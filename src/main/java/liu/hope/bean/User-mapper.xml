@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="liu.hope.dao.IUserDao" >
+
+	<!-- 第三方支持的缓存插件ehcache -->
+	<!-- 这个eacache 的type类型表示有日志且缓存 -->
+	 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" >
+	 	<!-- 空闲时间间隔 --> 
+        <property name="timeToIdleSeconds" value="3600"/>
+        <!-- 活动时间间隔 -->
+        <property name="timeToLiveSeconds" value="3600"/>
+        <!-- 同ehcache参数maxElementsInMemory -->
+        <property name="maxEntriesLocalHeap" value="1000"/>
+         <!-- 同ehcache参数maxElementsOnDisk -->
+        <property name="maxEntriesLocalDisk" value="10000000"/>
+        <!-- 缓存策略 -->
+        <property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache>
+
+	<sql id="selectFormat">
+		select userid,username,password,realname,email,user_desc,user_status,deptno,roleid,picpath from user
+	</sql>
+
+	<!-- 登录检测 -->
+	<select id="findOneByNameAndPwd" parameterType="liu.hope.bean.User" resultMap="userResultMap" useCache="false">
+		<include refid="selectFormat"/>
+		where username=#{username} and password=#{password} and user_status='0'
+	</select>
+	
+	<!-- shiro登录检测 -->
+	<select id="findOneByUsername" parameterType="java.lang.String" resultMap="userResultMap">
+		<include refid="selectFormat"/>
+		where username=#{username} and user_status='0'
+	</select>
+	
+	<resultMap type="liu.hope.bean.User" id="userResultMap">
+		<id property="userid" column="userid"/>
+		<result property="username" column="username"/>
+		<result property="password" column="password"/>
+		<result property="realname" column="realname"/>
+		<result property="email" column="email"/>
+		<result property="userDesc" column="user_desc"/>
+		<result property="userStatus" column="user_status"/>
+		<result property="picpath" column="picpath"/>
+		<association property="role" column="roleid" select="liu.hope.dao.IRoleDao.findOneByRoleid"></association>
+		<association property="dept" column="deptno" select="liu.hope.dao.IDeptDao.findOneByDeptNo"></association>
+	</resultMap>
+	
+	<!-- 分页查询 -->
+	<!-- 不等于     &lt;&gt; -->
+	<select id="findForLimit" parameterType="java.util.Map" resultMap="userResultMap">
+		<include refid="selectFormat"/>
+		where roleid not in (1) limit #{start},#{pageSize}
+	</select>
+	
+	<!-- 统计总行数 -->
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(userid) from user where roleid not in (1)
+	</select>
+	
+	<!-- 添加用户 -->
+	<insert id="appendUser" useGeneratedKeys="true" keyProperty="userid" parameterType="liu.hope.bean.UserCondition">
+		insert into user(username,password,realname,email,user_desc,user_status,deptno,roleid,picpath) 
+		values (#{username},#{password},#{realname},#{email},#{userDesc},#{userStatus},#{deptno},#{roleid},#{picpath}) 
+	</insert>
+	
+	<!-- 删除用户 -->
+	<update id="removeUser" parameterType="java.util.List">
+		update user set user_status='2' where userid in 
+		<foreach collection="list" item="item" index="index" open="("
+			separator="," close=")" >
+			#{item}
+		</foreach>
+	</update>
+	
+	
+	
+</mapper>

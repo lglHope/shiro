@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- 配置的参数 -->
+	<!-- 开启延迟加载 -->
+	<settings>
+		<!-- lazyLoadingEnabled:延迟加载启动，默认是false -->
+		<setting name="lazyLoadingEnabled" value="true" />
+		<!-- aggressiveLazyLoading：积极的懒加载，false的话按需加载，默认是true -->
+		<setting name="aggressiveLazyLoading" value="false" /> 
+		
+		
+		<!-- 开启二级缓存，默认为true(默认二级缓存是开启的) -->
+		<setting name="cacheEnabled" value="true" />
+		
+	</settings>
+
+	<!-- 引入实体映射文件 -->
+	<mappers>
+		<mapper resource="liu/hope/bean/User-mapper.xml" />
+		<mapper resource="liu/hope/bean/Role-mapper.xml" />
+		<mapper resource="liu/hope/bean/Dept-mapper.xml" />
+		<mapper resource="liu/hope/bean/Privilege-mapper.xml" />
+	</mappers>
+
+
+</configuration>

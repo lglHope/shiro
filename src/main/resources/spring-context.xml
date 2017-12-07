@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-autowire="byName"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd 
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop.xsd 
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/task 
+	   http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<!--扫描类注解 -->
+	<context:component-scan base-package="liu.hope" />
+	<context:annotation-config></context:annotation-config>
+
+	<!--扫描代理的注解 -->
+	<!-- <aop:aspectj-autoproxy proxy-target-class="true" /> -->
+	<!--引入配置文件 -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<!-- PropertyPlaceholderConfigurer类中有个locations属性，接收的是一个数组，即我们可以在下面配好多个properties文件 -->
+			<list>
+				<!-- 例如:在项目resource/config文件下 改成你自己的properties文件 -->
+				<value>classpath:config/db.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!--EntityManagerFactory -->
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+		<!--数据库连接池 -->
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-cfg.xml"></property>
+	</bean>
+	
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 数据库用户名称 -->
+		<property name="username" value="root" />
+		<!-- 数据库密码 -->
+		<property name="password" value="123456" />
+		<!-- JDBC连接串 -->
+		<property name="url"
+			value="jdbc:mysql://localhost:3306/control?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull" />
+		<!-- 连接池最大使用连接数量 -->
+		<property name="maxActive" value="20" />
+		<!-- 初始化大小 -->
+		<property name="initialSize" value="2" />
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="60000" />
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="0" />
+		<!-- 逐出连接的检测时间间隔 -->
+		<property name="timeBetweenEvictionRunsMillis" value="3000" />
+		<!-- 最小逐出时间 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<!-- 测试有效用的SQL Query -->
+		<property name="validationQuery" value="SELECT 'x'" />
+		<!-- 连接空闲时测试是否有效 -->
+		<property name="testWhileIdle" value="true" />
+		<!-- 获取连接时测试是否有效 -->
+		<property name="testOnBorrow" value="false" />
+		<!-- 归还连接时是否测试有效 -->
+		<property name="testOnReturn" value="false" />
+	</bean>
+
+	<!-- 注册dao接口 -->
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+		<property name="basePackage" value="liu.hope.dao"></property>
+	</bean>
+
+	<!-- 事务处理开始 -->
+	<!-- 准备事务处理对象 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<tx:annotation-driven proxy-target-class="true" />
+</beans>

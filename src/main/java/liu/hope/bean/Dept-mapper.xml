@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="liu.hope.dao.IDeptDao" >
+
+	<sql id="deptFormat">
+		select deptno,dname,dept_desc as deptDesc,parentid from dept
+	</sql>
+	
+	<select id="findOneByDeptNo" parameterType="java.lang.Integer" resultType="liu.hope.bean.Dept">
+		<include refid="deptFormat"/>
+		where deptno=#{deptno}
+	</select>
+	
+	<select id="findAllDept" resultType="liu.hope.bean.Dept">
+		<include refid="deptFormat"/>
+	</select>
+
+</mapper>

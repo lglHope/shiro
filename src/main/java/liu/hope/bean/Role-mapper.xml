@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="liu.hope.dao.IRoleDao" >
+	<sql id="selectFormat">
+		select roleid,role_cn as roleCn,role_en as roleEn,role_desc as roleDesc,role_status as roleStatus from role
+	</sql>
+	
+	<select id="findOneByRoleid" parameterType="java.lang.Integer" resultMap="roleResultMap">
+		<include refid="selectFormat"/>
+		where roleid=#{roleid}
+	</select>
+	
+	<resultMap type="liu.hope.bean.Role" id="roleResultMap">
+		<id property="roleid" column="roleid"/>
+		<result property="roleCn" column="role_cn"/>
+		<result property="roleEn" column="role_en"/>
+		<result property="roleDesc" column="role_desc"/>
+		<result property="roleStatus" column="role_status"/>
+		<collection property="privileges" column="roleid" javaType="java.util.ArrayList" 
+		ofType="Privilege" select="liu.hope.dao.IPrivilegeDao.findByRoleid"></collection>
+	</resultMap>
+	
+	<select id="findAllRole" resultType="liu.hope.bean.Role">
+		<include refid="selectFormat"/>
+		where roleid not in (1)
+	</select>
+	
+	
+</mapper>

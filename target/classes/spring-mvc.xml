@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-autowire="byName"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd 
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop.xsd 
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/task 
+	   http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<context:annotation-config></context:annotation-config>
+	<!-- 配置springmvc注解驱动 -->
+	<mvc:annotation-driven />
+	<!--扫描类注解 -->
+	<context:component-scan base-package="liu.hope">
+	</context:component-scan>
+	<!-- 配置springmvc的视图处理器(实现了rest风格) -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	<!-- 文件上传必备 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 上传文件大小上限，单位为字节（10MB） -->
+		<property name="maxUploadSizePerFile">
+			<value>10240000</value>
+		</property>
+		<!-- 请求的编码格式，必须和jSP的pageEncoding属性一致，以便正确读取表单的内容，默认为ISO-8859-1 -->
+		<property name="defaultEncoding">
+			<value>UTF-8</value>
+		</property>
+	</bean>
+	
+	<!-- 配置权限管理器 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<!-- ref对应我们写的realm MyShiro -->
+		<property name="realm" ref="userRealm" />
+	</bean>
+
+	<!-- Shiro Filter -->
+	<!-- 配置shiro的过滤器工厂类，id- shiroFilter要和我们在web.xml中配置的过滤器一致 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- 调用我们配置的权限管理器 -->
+		<property name="securityManager" ref="securityManager" />
+		<!-- 要求登录时的链接(可根据项目的URL进行替换),非必须的属性,默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
+		<property name="loginUrl" value="/index.jsp" />
+		<!-- 登录成功后要跳转的连接 -->
+		<property name="successUrl" value="/pages/main.jsp" />
+		<!-- 用户访问未对其授权的资源时,所显示的连接 -->
+		<!-- 若想更明显的测试此属性可以修改它的值,如unauthor.jsp,然后用[玄玉]登录后访问/admin/listUser.jsp就看见浏览器会显示unauthor.jsp -->
+		<property name="unauthorizedUrl" value="/pages/frame/uc/error.jsp" />
+		<property name="filterChainDefinitions">
+			<value>
+				/js/** = anon
+				/css/** = anon
+				/pages/** = anon
+				/images/** = anon
+				/test/** = anon
+				/user2/** = anon
+				/index.jsp = anon
+				/user/login = anon
+				/code/** = anon
+				<!-- /rc/** = perms[role:edit] /role/save = perms[role:edit] /role/list 
+					= perms[role:view] -->
+				/** = authc
+			</value>
+		</property>
+	</bean>
+
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	<!-- AOP式方法级权限检查,开启Shiro的注解(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证 -->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor" />
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+	<!-- 1.准备好转换的工具类，这个工具类必须实现Converter接口 -->
+	<bean id="dateConverter" class="liu.hope.utils.DateConverter"></bean>
+
+	<!-- 2.准备转换器，并把上一步的工具类纳入转换器中 -->
+	<bean id="conversionServiceFactory"
+		class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<ref bean="dateConverter" />
+			</set>
+		</property>
+	</bean>
+
+	<!-- 3.还需要让转换器起作用 -->
+	<mvc:annotation-driven conversion-service="conversionServiceFactory"></mvc:annotation-driven>
+	
+	<!-- quartz 任务调配 配置开始 -->
+	<task:annotation-driven/>
+	<!-- //不支持年份
+	@Scheduled(cron="15/2 * * * * ?")
+	@Scheduled(cron="秒 分 时 天 月 星期")没有年份
+	 -->
+
+	<!-- 放最后 -->
+	<mvc:default-servlet-handler />
+
+</beans>
+	

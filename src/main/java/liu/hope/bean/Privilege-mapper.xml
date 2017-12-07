@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="liu.hope.dao.IPrivilegeDao">
+
+	<!-- 根据roleid，查询角色对应的权限 -->
+	<select id="findByRoleid" parameterType="java.lang.Integer"
+		resultType="liu.hope.bean.Privilege">
+		select p.priid as priid,p.pri_name as priName,p.pri_url as priUrl,p.pri_image as priImage ,p.parentid as parentid,p.pri_status as priStatus,p.pri_desc as priDesc
+		from privilege p,pri_role_relax x
+		where p.priid=x.priid and
+		x.roleid=#{roleid}
+	</select>
+	
+	<!-- 查询所有的权限信息 -->
+	<select id="findAll" resultType="liu.hope.bean.Privilege">
+		select p.priid as priid,p.pri_name as priName,p.pri_url as priUrl,p.pri_image as priImage ,p.parentid as parentid,p.pri_status as priStatus,p.pri_desc as priDesc 
+		from privilege p
+	</select>
+	
+	<!-- 查询所有的权限信息 -->
+	<select id="findAllPrivilegeUri" resultType="java.lang.String">
+		select p.pri_url from privilege p
+	</select>
+	
+	<select id="findByUsername" parameterType="java.lang.String"
+		resultType="liu.hope.bean.Privilege">
+		select p.priid as priid,p.pri_name as priName,p.pri_url as priUrl,p.pri_image as priImage ,p.parentid as parentid,p.pri_status as priStatus,p.pri_desc as priDesc
+		from privilege p,pri_role_relax x,user u
+		where p.priid=x.priid and u.roleid=x.rolrid and
+		x.username=#{username}
+	</select>
+	
+	
+
+</mapper>

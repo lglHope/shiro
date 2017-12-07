@@ -1,0 +1,24 @@
+<ehcache>
+    <!--表示硬盘上保存缓存的位置。默认是临时文件夹。-->
+    <diskStore path="java.io.tmpdir"/>
+    <!--默认缓存配置，如果类没有做特定的设置，则使用这里配置的缓存属性。
+       maxElementsInMemory  - 设置缓存中允许保存的最大对象（pojo）数量
+       eternal -设置对象是否永久保存，如果为true，则缓存中的数据永远不销毁，一直保存。
+       timeToIdleSeconds - 设置空闲销毁时间。只有eternal为false时才起作用。表示从现在到上次访问时间如果超过这个值，则缓存数据销毁
+       timeToLiveSeconds-设置活动销毁时间。表示从现在到缓存创建时间如果超过这个值，则缓存自动销毁
+       overflowToDisk - 设置是否在超过保存数量时，将超出的部分保存到硬盘上。-->
+    <defaultCache
+        maxElementsInMemory="1500"
+        eternal="false"
+        timeToIdleSeconds="120"
+        timeToLiveSeconds="300"
+        overflowToDisk="true"/>
+<!-- 也可以通过name设置针对某个类的缓存配置
+    <cache name="cn.sz.po.Emp"
+        maxElementsInMemory="1000"
+        eternal="true"
+        timeToIdleSeconds="0"
+        timeToLiveSeconds="0"
+        overflowToDisk="false"
+        />-->
+</ehcache>
